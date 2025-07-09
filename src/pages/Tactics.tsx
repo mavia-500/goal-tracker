@@ -1,53 +1,72 @@
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import { useParams } from "react-router-dom";
-import { useState } from "react";
-import { addTactic, editTactic } from "../goalSlice/goalSlice";
+import { useState, useEffect } from "react";
+import {
+  addTactic,
+  editTactic,
+  toggleTacticCompletion,
+} from "../goalSlice/goalSlice";
 
 const Tactics = () => {
-  const { quadrant, goaltitle } = useParams<{ quadrant?: string; goaltitle?: string }>();
+  const { quadrant, goaltitle } = useParams<{
+    quadrant?: string;
+    goaltitle?: string;
+  }>();
   const goals = useSelector((state: RootState) => state.goals.goals);
+  console.log(goals);
   const dispatch = useDispatch();
   const [newTactic, setNewTactic] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editTacticText, setEditTacticText] = useState("");
-  // New state to track completion status
-  const [completedTactics, setCompletedTactics] = useState<boolean[]>([]);
 
   // Find the specific goal and get its tactics as a flat array
-  const goal = goals.find(
-    (g) => g.quartername === quadrant 
-    // && g.title === goaltitle
-  );
-  const tactics = Array.isArray(goal?.tactic) ? goal.tactic : [];
+  const quarter = goals.find((g) => g.quartername === quadrant);
+  console.log("quarter found ", quarter);
 
-  // Initialize completedTactics state when tactics change
-  // This ensures the completion array matches the tactics array length
-  useState(() => {
-    setCompletedTactics(new Array(tactics.length).fill(false));
-  }, [tactics.length]);
+  const goal = quarter?.goal.find((goal) => goal.goalTitle === goaltitle);
+  console.log(goal);
+  const tactics = goal?.tactics;
+  console.log(tactics);
 
-  // Handle checkbox toggle
+  const completedCount =
+    tactics?.filter((tactic) => tactic.completedTactics).length || 0;
+  const totalTactics = tactics?.length;
+  const completionPercentage: any =
+    totalTactics && totalTactics > 0
+      ? ((completedCount / totalTactics) * 100).toFixed(2)
+      : 0;
+  console.log(completionPercentage);
+  // / Handle checkbox toggle
   const handleToggleComplete = (index: number) => {
-    setCompletedTactics((prev) =>
-      prev.map((completed, i) => (i === index ? !completed : completed))
-    );
+    // Calculate completion percentage
+
+    if (quadrant && goaltitle) {
+      dispatch(
+        toggleTacticCompletion({
+          quadrant,
+          goaltitle,
+          index,
+          completionPercentage,
+        })
+      );
+    }
   };
 
-  // Calculate completion percentage
-  const totalTactics = tactics.length;
-  const completedCount = completedTactics.filter((completed) => completed).length;
-  const completionPercentage =
-    totalTactics > 0 ? ((completedCount / totalTactics) * 100).toFixed(2) : 0;
-console.log(completionPercentage)
   const handleTactic = () => {
     if (newTactic.trim() && quadrant && goaltitle) {
-      dispatch(addTactic({ quadrant, title: goaltitle, tactic: newTactic }));
+      dispatch(
+        addTactic({
+          quadrant,
+          goaltitle,
+          newTactic,
+          completedTactics: false,
+          completionPercentage,
+        })
+      );
       setNewTactic("");
       setIsOpen(false);
-      // Add false to completedTactics for the new tactic
-      setCompletedTactics((prev) => [...prev, false]);
     } else {
       setIsOpen(false);
     }
@@ -60,7 +79,14 @@ console.log(completionPercentage)
 
   const handleSaveEdit = (index: number) => {
     if (editTacticText.trim() && quadrant && goaltitle) {
-      dispatch(editTactic({ quadrant, title: goaltitle, index, newTactic: editTacticText }));
+      dispatch(
+        editTactic({
+          quadrant,
+          title: goaltitle,
+          index,
+          newTactic: editTacticText,
+        })
+      );
       setEditIndex(null);
       setEditTacticText("");
     }
@@ -82,11 +108,13 @@ console.log(completionPercentage)
         </p>
       </div>
       <div className="mb-8">
-        {tactics.length === 0 ? (
-          <div className="text-gray-500 italic text-center">No tactics to show</div>
+        {tactics?.length === 0 ? (
+          <div className="text-gray-500 italic text-center">
+            No tactics to show please create the tactics first
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {tactics.map((tactic, index) => (
+            {tactics?.map((tactic, index) => (
               <div
                 key={index}
                 className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
@@ -119,14 +147,16 @@ console.log(completionPercentage)
                   <div className="flex flex-col space-y-3">
                     <span
                       className={`text-gray-700 text-base font-medium ${
-                        completedTactics[index] ? "line-through text-gray-400" : ""
+                        tactic.completedTactics
+                          ? "line-through text-gray-400"
+                          : ""
                       }`}
                     >
-                      {tactic}
+                      {tactic.tactic}
                     </span>
                     <div className="flex justify-between items-center">
                       <button
-                        onClick={() => handleEditTactic(index, tactic)}
+                        onClick={() => handleEditTactic(index, tactic.tactic)}
                         className="px-3 py-1 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition duration-200"
                       >
                         Edit
@@ -135,7 +165,7 @@ console.log(completionPercentage)
                         <input
                           type="checkbox"
                           className="form-checkbox h-5 w-5 text-green-600"
-                          checked={completedTactics[index] || false}
+                          checked={tactic.completedTactics || false}
                           onChange={() => handleToggleComplete(index)}
                         />
                         <span className="text-gray-600 text-sm">Completed</span>

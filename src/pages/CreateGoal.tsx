@@ -3,7 +3,9 @@ import { useDispatch } from "react-redux";
 import { addSeperateGoal } from "../goalSlice/goalSlice";
 import { useParams } from "react-router-dom";
 import { useLocation } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 const NewGoalForm = () => {
+  const navigate=useNavigate()
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search)
   const quarter = queryParams.get('quarter');
@@ -12,14 +14,14 @@ const NewGoalForm = () => {
   console.log(quarter)
   // Define TypeScript interface for goalData
   interface GoalData {
-    title: string;
+    goalTitle: string;
     description: string;
     quartername:string
   }
 
   // Initialize state with all form fields
   const [goalData, setGoalData] = useState<GoalData>({
-    title: "",
+    goalTitle: "",
     description: "",
     quartername:quarter || ""
   });
@@ -51,7 +53,7 @@ const NewGoalForm = () => {
   // Handle form submission
   const handleSubmit = () => {
     // Validate required fields
-    if (!goalData.title) {
+    if (!goalData.goalTitle) {
       alert("Please fill in all required fields (Title and Quadrant).");
       return;
     }
@@ -61,11 +63,12 @@ const NewGoalForm = () => {
 
     // Reset form after submission
     setGoalData({
-      title: "",
+      goalTitle: "",
       description: "",
       quartername:quarter || ""
     });
     setIsOpen(false);
+    navigate(`/goals/${quarter}`)
    
   };
 
@@ -93,9 +96,9 @@ const NewGoalForm = () => {
         <div className="max-w-[480px] w-full px-4 space-y-4">
           <input
             type="text"
-            name="title"
+            name="goalTitle"
             placeholder="Goal Title"
-            value={goalData.title}
+            value={goalData.goalTitle}
             onChange={handleInputChange}
             className="w-full h-14 rounded-lg bg-[#f0f2f5] p-4 text-base placeholder:text-[#60758a] focus:outline-none"
           />

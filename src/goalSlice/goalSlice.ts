@@ -1,15 +1,18 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
 
 // Define the shape of a single goal
 interface Goal {
-  goals:string[]
-  title: string;
-  description: string[];
   quartername: string;
-  tactic: string[];
-  notes: string;
-  deadline: string | null;
+  quarterCompletoinPercentage: number;
+  goal: {
+    goalTitle: string;
+    description: string;
+    tactics: { tactic: string; completedTactics: boolean }[];
+    completionPercentage: number | 0;
+  }[];
+  startDate: string;
+  endDate: string;
 }
 
 // Define the state shape
@@ -24,56 +27,164 @@ const initialState: GoalsState = {
 
 // Create the slice
 const goalsSlice = createSlice({
-  name: 'goals',
+  name: "goals",
   initialState,
   reducers: {
     addGoal: (state, action: PayloadAction<Goal>) => {
+      console.log(state.goals);
       state.goals.push({
         ...action.payload,
-        tactic: Array.isArray(action.payload.tactic) ? action.payload.tactic : [],
-        goals: Array.isArray(action.payload.goals) ? action.payload.goals : [],
+        // tactic: Array.isArray(action.payload.tactic) ? action.payload.tactic : [],
+        // goals: Array.isArray(action.payload.goals) ? action.payload.goals : [],
       });
     },
-    addTactic: (state, action: PayloadAction<{ quadrant: string; title: string; tactic: string }>) => {
-      const { quadrant, title, tactic } = action.payload;
-      const goal = state.goals.find(
-        (g) => g.quartername === quadrant 
-      );
-      if (goal) {
-        if (!Array.isArray(goal.tactic)) {
-          goal.tactic = goal.tactic ? [goal.tactic] : [];
-        }
-        goal.tactic.push(tactic);
-      } else {
-        console.warn(`Goal with quadrant "${quadrant}" and title "${title}" not found.`);
+
+    addquarterCompletoinPercentage: (
+      state: GoalsState,
+      action: PayloadAction<{
+        quarter: string;
+        quarterCompletoinPercentage: number;
+      }>
+    ) => {
+      const {quarterCompletoinPercentage,quarter}=action.payload
+      const quartar = state.goals.find((g) => g.quartername === quarter);
+      if(quartar){
+        quartar.quarterCompletoinPercentage = quarterCompletoinPercentage
       }
+      
     },
-    editTactic: (state, action: PayloadAction<{ quadrant: string; title: string; index: number; newTactic: string }>) => {
-      const { quadrant, title, index, newTactic } = action.payload;
-      const goal = state.goals.find(
-        (g) => g.quartername === quadrant 
-      );
-      if (goal && Array.isArray(goal.tactic) && index >= 0 && index < goal.tactic.length) {
-        goal.tactic[index] = newTactic;
+
+    addTactic: (
+      state: GoalsState,
+      action: PayloadAction<{
+        quadrant: string;
+        goaltitle: string;
+        newTactic: string;
+        completedTactics: boolean;
+        completionPercentage: number;
+      }>
+    ) => {
+      const { quadrant, goaltitle, newTactic, completedTactics } =
+        action.payload;
+      console.log("Action:", action);
+      console.log("Payload:", {
+        quadrant,
+        goaltitle,
+        newTactic,
+        completedTactics,
+      });
+      console.log("State:", state);
+
+      // Find the goal matching both quadrant and goaltitle
+      const quarter = state.goals.find((g) => g.quartername === quadrant);
+      console.log("Found gquartre:", quarter);
+
+      const goalo = quarter?.goal.find((goal) => {
+        if (goal.goalTitle === goaltitle) {
+          return goal;
+        }
+      });
+      console.log("Found goal:", goalo);
+
+      const addtact = quarter?.goal;
+      if (goalo) {
+        // Ensure goal.tactic is an array
+        if (!Array.isArray(goalo.tactics)) {
+          goalo.tactics = goalo.tactics ? [goalo.tactics] : [];
+        }
+        // Add the new tactic
+        goalo.tactics.push({ tactic: newTactic, completedTactics });
       } else {
-        console.warn(`Goal or tactic not found for quadrant "${quadrant}", title "${title}", index ${index}.`);
+        console.warn(
+          `Goal with quadrant "${quadrant}" and title "${goaltitle}" not found.`
+        );
       }
     },
 
-    addSeperateGoal: (state, action: PayloadAction<{ quartername: string; title: string; description: string }>) => {
-      const { quartername, title, description } = action.payload;
-      console.log(quartername, title, description)
-      const goal = state.goals.find(
-        (g) => g.quartername === quartername 
-      );
+    toggleTacticCompletion: (
+      state: GoalsState,
+      action: PayloadAction<{
+        quadrant: string;
+        goaltitle: string;
+        index: number;
+        completionPercentage: number | 0;
+      }>
+    ) => {
+      const { quadrant, goaltitle, index, completionPercentage } =
+        action.payload;
+
+      // Find the quarter and goal
+      const quarter = state.goals.find((g) => g.quartername === quadrant);
+      const goal = quarter?.goal.find((g) => g.goalTitle === goaltitle);
+      console.log(goal);
       if (goal) {
-        if (!Array.isArray(goal.goals)) {
-          goal.goals = goal.goals ? [goal.goals] : [];
+        goal.completionPercentage = completionPercentage;
+        console.log(completionPercentage);
+      }
+      if (
+        goal &&
+        Array.isArray(goal.tactics) &&
+        index >= 0 &&
+        index < goal.tactics.length
+      ) {
+        // Toggle the completedTactics boolean for the specified tactic
+        goal.tactics[index].completedTactics =
+          !goal.tactics[index].completedTactics;
+
+        // Calculate and update completionPercentage
+      } else {
+        console.warn(
+          `Goal or tactic not found for quadrant "${quadrant}", title "${goaltitle}", index ${index}.`
+        );
+      }
+    },
+
+    editTactic: (
+      state,
+      action: PayloadAction<{
+        quadrant: string;
+        title: string;
+        index: number;
+        newTactic: string;
+      }>
+    ) => {
+      const { quadrant, title, index, newTactic } = action.payload;
+      const goal = state.goals.find((g) => g.quartername === quadrant);
+      if (
+        goal &&
+        Array.isArray(goal.tactic) &&
+        index >= 0 &&
+        index < goal.tactic.length
+      ) {
+        goal.tactic[index] = newTactic;
+      } else {
+        console.warn(
+          `Goal or tactic not found for quadrant "${quadrant}", title "${title}", index ${index}.`
+        );
+      }
+    },
+
+    addSeperateGoal: (
+      state,
+      action: PayloadAction<{
+        quartername: string;
+        goalTitle: string;
+        description: string;
+      }>
+    ) => {
+      const { quartername, goalTitle, description } = action.payload;
+      console.log(quartername, goalTitle, description);
+      const goal = state.goals.find((g) => g.quartername === quartername);
+      if (goal) {
+        if (!Array.isArray(goal.goal)) {
+          goal.goal = goal.goal ? [goal.goal] : [];
         }
-        goal.goals.push(title);
+        goal.goal.push({ goalTitle: goalTitle, description, tactics: [] });
         // goal.description.push(description);
       } else {
-        console.warn(`Goal with quadrant "${quartername}" and title "${title}" not found.`);
+        console.warn(
+          `Goal with quadrant "${quartername}" and title "${goalTitle}" not found.`
+        );
       }
     },
     // editTactic: (state, action: PayloadAction<{ quadrant: string; title: string; index: number; newTactic: string }>) => {
@@ -91,7 +202,14 @@ const goalsSlice = createSlice({
 });
 
 // Export actions
-export const { addGoal, addTactic, editTactic,addSeperateGoal } = goalsSlice.actions;
+export const {
+  addGoal,
+  addTactic,
+  editTactic,
+  addSeperateGoal,
+  toggleTacticCompletion,
+  addquarterCompletoinPercentage
+} = goalsSlice.actions;
 
 // Export reducer
 export default goalsSlice.reducer;

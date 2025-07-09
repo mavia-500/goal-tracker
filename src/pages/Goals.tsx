@@ -1,10 +1,12 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import type { RootState } from "../store/store";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+// import { UseDispatch } from "react-redux";
+import { addquarterCompletoinPercentage } from "../goalSlice/goalSlice";
 
 interface Goal {
   goals: string[];
@@ -18,40 +20,32 @@ interface Goal {
   enddate: string;
 }
 
-const tacticColors: Record<string, { bg: string; text: string; ring: string }> =
-  {
-    Focus: {
-      bg: "bg-purple-100",
-      text: "text-purple-700",
-      ring: "ring-purple-300",
-    },
-    Speed: { bg: "bg-pink-100", text: "text-pink-700", ring: "ring-pink-300" },
-    Quality: {
-      bg: "bg-blue-100",
-      text: "text-blue-700",
-      ring: "ring-blue-300",
-    },
-    Growth: {
-      bg: "bg-green-100",
-      text: "text-green-700",
-      ring: "ring-green-300",
-    },
-    Default: {
-      bg: "bg-gray-100",
-      text: "text-gray-700",
-      ring: "ring-gray-300",
-    },
-  };
 
 const Goals = () => {
+  const dispatch=useDispatch()
   const { quarter } = useParams<{ quarter: string }>();
   const wholeGoals = useSelector((state: RootState) => state.goals.goals);
-  console.log(quarter);
+  console.log(wholeGoals);
 
   const showGoals: any = wholeGoals
     .filter((goal) => goal.quartername === quarter)
 
-    const diplaygoal=showGoals.flatMap((goal:any) => goal.goals);
+    const diplaygoal=showGoals.flatMap((goal:any) => goal.goal);
+    console.log(diplaygoal)
+// let sum=0
+    const total=diplaygoal.reduce((acc:number,cur:any)=>{
+      return acc+parseFloat(cur.completionPercentage)
+ 
+    },0)
+    console.log(total)
+    const quarterCompletoinPercentage:number=parseFloat((total/diplaygoal.length).toFixed(2))
+console.log(quarterCompletoinPercentage)
+dispatch(addquarterCompletoinPercentage({
+  quarter,
+  quarterCompletoinPercentage,
+
+}))
+    // addquarterCompletoinPercentage
   const goals = Array.isArray(showGoals?.goals) ? showGoals.goals : [];
   console.log(showGoals);
   const [isOpen, setIsOpen] = useState(false);
@@ -79,7 +73,7 @@ const Goals = () => {
         </Link>
       </div>
 
-      {diplaygoal.length === 0 ? (
+      {diplaygoal[0] === undefined ? (
         <motion.div
           className="text-center text-gray-600 mt-20"
           initial={{ opacity: 0, y: 10 }}
@@ -104,12 +98,12 @@ const Goals = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-2xl font-bold text-gray-900">{goal}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">{goal.goalTitle}</h3>
                   
                 </div>
 
                 <p className="text-gray-700 text-sm mb-4 leading-relaxed">
-                  {/* {goal.description} */}
+                  {goal.description}
                 </p>
                 {/* {goal.tactic.map((tactic) => {})} */}
                 <div className="text-sm space-y-2 mt-4">
@@ -138,7 +132,7 @@ const Goals = () => {
                     </span>
                   </p>
 
-                  <Link to={`/tactics/${quarter}/${goal}`}>
+                  <Link to={`/tactics/${quarter}/${goal.goalTitle}`}>
                     {" "}
                     <p className="text-green-700 font-bold">View Tactics</p>
                   </Link>
@@ -152,10 +146,10 @@ const Goals = () => {
                   <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden">
                     <div
                       className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500 rounded-full"
-                      style={{ width: `30%` }}
+                      style={{ width: `${goal.completionPercentage}%` }}
                     />
-                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs font-bold text-purple-50 drop-shadow-sm">
-                      30%
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs font-bold text-purple-500 drop-shadow-sm">
+                      {goal.completionPercentage}%
                     </span>
                   </div>
                 </div>
