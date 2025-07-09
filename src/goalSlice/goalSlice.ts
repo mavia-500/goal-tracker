@@ -11,8 +11,8 @@ interface Goal {
     tactics: { tactic: string; completedTactics: boolean }[];
     completionPercentage: number | 0;
   }[];
-  startDate: string;
-  endDate: string;
+  startdate: string;
+  enddate: string;
 }
 
 // Define the state shape
@@ -86,7 +86,7 @@ const goalsSlice = createSlice({
       });
       console.log("Found goal:", goalo);
 
-      const addtact = quarter?.goal;
+      // const addtact = quarter?.goal;
       if (goalo) {
         // Ensure goal.tactic is an array
         if (!Array.isArray(goalo.tactics)) {
@@ -143,23 +143,26 @@ const goalsSlice = createSlice({
       state,
       action: PayloadAction<{
         quadrant: string;
-        title: string;
+        goaltitle: string;
         index: number;
         newTactic: string;
       }>
     ) => {
-      const { quadrant, title, index, newTactic } = action.payload;
-      const goal = state.goals.find((g) => g.quartername === quadrant);
+      const { quadrant, goaltitle, index, newTactic } = action.payload;
+      console.log(quadrant,goaltitle)
+      const quarter = state.goals.find((g) => g.quartername === quadrant);
+      const goal = quarter?.goal.find((g) => g.goalTitle === goaltitle);
+      console.log(goal)
       if (
         goal &&
-        Array.isArray(goal.tactic) &&
+        Array.isArray(goal.tactics) &&
         index >= 0 &&
-        index < goal.tactic.length
+        index < goal.tactics.length
       ) {
-        goal.tactic[index] = newTactic;
+        goal.tactics[index] = {tactic:newTactic,completedTactics:false};
       } else {
         console.warn(
-          `Goal or tactic not found for quadrant "${quadrant}", title "${title}", index ${index}.`
+          `Goal or tactic not found for quadrant "${quadrant}", title "${goaltitle}", index ${index}.`
         );
       }
     },
@@ -179,7 +182,7 @@ const goalsSlice = createSlice({
         if (!Array.isArray(goal.goal)) {
           goal.goal = goal.goal ? [goal.goal] : [];
         }
-        goal.goal.push({ goalTitle: goalTitle, description, tactics: [] });
+        goal.goal.push({ goalTitle: goalTitle, description, tactics: [],completionPercentage:0 });
         // goal.description.push(description);
       } else {
         console.warn(

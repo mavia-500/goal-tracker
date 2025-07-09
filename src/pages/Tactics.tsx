@@ -1,7 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+
 import {
   addTactic,
   editTactic,
@@ -82,7 +83,7 @@ const Tactics = () => {
       dispatch(
         editTactic({
           quadrant,
-          title: goaltitle,
+           goaltitle,
           index,
           newTactic: editTacticText,
         })

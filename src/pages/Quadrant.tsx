@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type{ FC } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";

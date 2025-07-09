@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type{ FC } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 
@@ -14,7 +14,7 @@ interface GoalCardProps {
 const GoalCard: FC<GoalCardProps> = ({
   quartername,
   quarterCompletoinPercentage,
-  score,
+  // score,
   enddate,
   startdate,
 }) => {

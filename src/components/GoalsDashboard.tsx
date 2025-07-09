@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type{ FC } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -6,13 +6,7 @@ import GoalCard from "./GoalCard";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 
-// const goalsData: any = [
-//   // Uncomment to test empty state
-//   { quarter: "Q1", goals: "2 Goals", progress: 56.8182, score: 50 },
-//   { quarter: "Q2", goals: "3 Goals", progress: 85.2273, score: 75 },
-//   { quarter: "Q3", goals: "1 Goal", progress: 28.4091, score: 25 },
-//   { quarter: "Q4", goals: "4 Goals", progress: 100, score: 100 },
-// ];
+
 
 const GoalsDashboard: FC = () => {
   const goalsData = useSelector((state: RootState) => state.goals.goals);

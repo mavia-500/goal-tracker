@@ -1,7 +1,7 @@
 
 import { Routes,Route } from "react-router-dom";
 // import GoalCard from "./components/GoalCard"
-import GoalsDashboard from "./components/GoalsDashboard";
+// import GoalsDashboard from "./components/GoalsDashboard";
 import CreateGoal from "./pages/CreateGoal.tsx";
 import Goals from "./pages/Goals.tsx";
 import Home from "./pages/Home.tsx";

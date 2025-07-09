@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { addGoal } from "../goalSlice/goalSlice";
 import { useDispatch } from "react-redux";
 // import { Navigate } from "react-router-dom";
@@ -11,6 +11,9 @@ const NewQuadrant = () => {
     quartername: "",
     startdate: "",
     enddate: "",
+    quarterCompletoinPercentage:0,
+     goal:[]
+    
   });
   const handleInputs = (e: any) => {
     const { name, value } = e.target;

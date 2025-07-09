@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addSeperateGoal } from "../goalSlice/goalSlice";
-import { useParams } from "react-router-dom";
+
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 const NewGoalForm = () => {
@@ -9,7 +9,7 @@ const NewGoalForm = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search)
   const quarter = queryParams.get('quarter');
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
 // const{quarter}=useParams()
   console.log(quarter)
   // Define TypeScript interface for goalData
@@ -34,7 +34,7 @@ const NewGoalForm = () => {
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
-    index?: number
+    
   ) => {
     const { name, value } = e.target;
 
@@ -67,7 +67,7 @@ const NewGoalForm = () => {
       description: "",
       quartername:quarter || ""
     });
-    setIsOpen(false);
+    // setIsOpen(false);
     navigate(`/goals/${quarter}`)
    
   };

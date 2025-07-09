@@ -1,4 +1,4 @@
-import React from "react";
+// import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -8,22 +8,23 @@ import { Link } from "react-router-dom";
 // import { UseDispatch } from "react-redux";
 import { addquarterCompletoinPercentage } from "../goalSlice/goalSlice";
 
-interface Goal {
-  goals: string[];
-  title: string;
-  description: string;
-  quartername: string;
-  newQuadrant: string;
-  tactic: string[];
-  notes: string[];
-  startdate: string;
-  enddate: string;
-}
+// interface Goal {
+//   goals: string[];
+//   title: string;
+//   description: string;
+//   quartername: string;
+//   newQuadrant: string;
+//   tactic: string[];
+//   notes: string[];
+//   startdate: string;
+//   enddate: string;
+// }
 
 
 const Goals = () => {
   const dispatch=useDispatch()
-  const { quarter } = useParams<{ quarter: string }>();
+  const { quarter } = useParams<{ quarter: string  }>();
+  
   const wholeGoals = useSelector((state: RootState) => state.goals.goals);
   console.log(wholeGoals);
 
@@ -40,13 +41,17 @@ const Goals = () => {
     console.log(total)
     const quarterCompletoinPercentage:number=parseFloat((total/diplaygoal.length).toFixed(2))
 console.log(quarterCompletoinPercentage)
+if (!quarter) {
+  console.error("Quarter parameter is undefined");
+  return; // Skip dispatch if quarter is undefined
+}
 dispatch(addquarterCompletoinPercentage({
   quarter,
   quarterCompletoinPercentage,
 
 }))
     // addquarterCompletoinPercentage
-  const goals = Array.isArray(showGoals?.goals) ? showGoals.goals : [];
+  // const goals = Array.isArray(showGoals?.goals) ? showGoals.goals : [];
   console.log(showGoals);
   const [isOpen, setIsOpen] = useState(false);
   const [quadrantName, setQuadrantName] = useState("");
